@@ -1,0 +1,153 @@
+/*
+ * BackgroundScanner.java
+ *
+ * Created on 11. toukokuuta 2007, 13:14
+ *
+ * To change this template, choose Tools | Template Manager
+ * and open the template in the editor.
+ */
+package classfilescanner;
+
+import classfile.ClassFile;
+import classfile.Reference;
+import filetree.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import javax.swing.SwingWorker;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+
+/**
+ *
+ * @author z705692
+ */
+public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNode> {
+    private static FileFilter classFileFilter = new ClassFileFilter();
+    private File rootForScan;
+    private Collection<Reference> references;
+    private Collection<Reference> excludes;
+    Set<Reference> foundReferences = new TreeSet<Reference>(); // Sorted according to the natural order of elements (see String compareTo)
+    private int nbrofScannedClasses;
+    private DefaultTreeModel model;
+
+    /**
+     * Creates a new instance of BackgroundScanner
+     *
+     * @param root
+     * @param refs
+     * @param mod
+     */
+    public BackgroundScanner(File root, Collection<Reference> refs, Collection<Reference> excls, DefaultTreeModel mod) {
+        rootForScan = root;
+        references = refs;
+        excludes = excls != null ? excls : new ArrayList<Reference>();
+        model = mod;
+    }
+
+    @Override
+    protected Set<Reference> doInBackground() throws Exception {
+        getPropertyChangeSupport().firePropertyChange("nbrofScannedClasses", -1, nbrofScannedClasses); // "reset" to '0'
+        try {
+            if (rootForScan.isDirectory()) {
+                scanDir(rootForScan);
+            } else {
+                FileInputStream fis = new FileInputStream(rootForScan);
+                scanArchive(new ZipInputStream(fis));
+                fis.close();
+            }
+        } catch (Throwable t) {
+            t.printStackTrace(System.err);
+        }
+        return foundReferences;
+    }
+
+    public void checkUsage() throws UsageException {
+    }
+
+    public void setRoot(File f) {
+    }
+
+    public File getRootForScan() {
+        return rootForScan;
+    }
+
+    public int getNbrofScannedClasses() {
+        return nbrofScannedClasses;
+    }
+
+    private void scanDir(File dir) throws IOException {
+//        File[] files = dir.listFiles(classFileFilter);// filter can be null !
+        File[] files = dir.listFiles();
+        for (File f : files) {
+            if (isCancelled()) {
+                break;
+            }
+            if (f.isDirectory()) {
+                scanDir(f);
+            } else if (Util.isArchive(f.getName())) {
+                scanArchive(new ZipInputStream(new FileInputStream(f)));
+            } else if (Util.isClassFile(f.getName())) {
+                FileInputStream fis = new FileInputStream(f);
+                scanTarget(new FileTarget(f, fis));
+                fis.close();
+            }
+        }
+    }
+
+    private void scanArchive(ZipInputStream zis) throws IOException {
+        ZipEntry e = zis.getNextEntry();
+        while (e != null && !isCancelled()) {
+            String name = e.getName();
+            if (Util.isClassFile(name)) {
+                scanTarget(new ZipInputStreamTarget(zis, e));
+            } else if (Util.isArchive(name)) {
+                scanArchive(new ZipInputStream(zis));
+            }
+            zis.closeEntry();
+            e = zis.getNextEntry();
+        }
+    }
+
+    private boolean scanTarget(ScanTarget target) throws IOException {
+//        String pathName = target.getName();
+//        if (pathName.endsWith(".class")) {
+        ClassFile cf = new ClassFile(target.getInputStream());
+        Collection<Reference> refs = filetree.Util.findReferences(references, cf, excludes);
+        if (refs.size() > 0) {
+            MutableTreeNode classNode = new DefaultMutableTreeNode(cf);//target.getName());
+            for (Reference r : refs) {
+                DefaultMutableTreeNode refNode = new DefaultMutableTreeNode(r);
+                refNode.setAllowsChildren(false);
+                classNode.insert(refNode, classNode.getChildCount());
+            }
+            publish(classNode);
+            foundReferences.addAll(refs);
+        }
+//        } else {
+//            System.err.println("Not a class file: " + target);
+//        }
+        int oldCount = nbrofScannedClasses;
+        getPropertyChangeSupport().firePropertyChange("nbrofScannedClasses", oldCount, ++nbrofScannedClasses);
+        return true;
+    }
+
+    @Override
+    protected void process(List<MutableTreeNode> nodes) {
+        if (model != null) {
+            MutableTreeNode rootNode = (MutableTreeNode) model.getRoot();
+            for (MutableTreeNode n : nodes) {
+                model.insertNodeInto(n, rootNode, rootNode.getChildCount());
+            }
+        }
+    }
+}

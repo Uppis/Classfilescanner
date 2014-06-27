@@ -1,0 +1,14 @@
+root { 
+    display: block;
+
+    font-family: Geneva,Arial,Helvetica,sans-serif;
+    font-weight: bold;
+    color: maroon;
+}
+.wiz_title {
+
+    font-weight: bold;
+    color: maroon;
+    font-size: 14px;
+}
+
