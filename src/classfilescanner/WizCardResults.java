@@ -274,7 +274,7 @@ private void lstFoundReferencesMouseClicked(java.awt.event.MouseEvent evt) {//GE
     private void cmdReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdReportActionPerformed
         try {
             // TODO add your handling code here:
-            FrmReport report = new FrmReport(null, true, (Set<Reference>)backgroundScanner.get());
+            FrmReport report = new FrmReport(null, true, resultTreeModel, (Set<Reference>)backgroundScanner.get());
             report.setLocationRelativeTo(this);
             report.setVisible(true);
         } catch (InterruptedException ex) {
