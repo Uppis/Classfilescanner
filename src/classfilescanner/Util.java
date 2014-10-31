@@ -1,14 +1,8 @@
-/*
- * Util.java
- * 
- * Created on 8.6.2007, 10:13:01
- * 
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package classfilescanner;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,17 +11,26 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
 import javax.swing.ComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JTable;
 import javax.swing.MutableComboBoxModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  *
  * @author z705692
  */
 public class Util {
-    
+
+    public static void setListSelectionListeners(JTable list, JButton defaultButton) {
+        list.addMouseListener(new MouseDblClickListener(defaultButton));
+        list.addKeyListener(new EnterKeyListener(defaultButton));
+        list.getSelectionModel().addListSelectionListener(new DefaultButtonEnabler(list, defaultButton));
+    }
+
     public static void updateComboList(JComboBox box) {
         Object selected = box.getSelectedItem();
         if (selected != null && selected instanceof String) {
@@ -42,7 +45,7 @@ public class Util {
             }
         }
     }
-    
+
     public static RecentItem[] loadRecentItems(Preferences fromNode) throws BackingStoreException {
         String[] keys = fromNode.keys();
         ArrayList<RecentItem> values = new ArrayList<RecentItem>(keys.length);
@@ -55,7 +58,7 @@ public class Util {
         Collections.sort(values);
         return values.toArray(new RecentItem[values.size()]);
     }
-    
+
     public static void saveRecentItems(ComboBoxModel fromModel, Preferences toNode, int maxNbrofItems) throws BackingStoreException {
         RecentItem[] items = new RecentItem[fromModel.getSize()];
         for (int i = 0; i < items.length; i++) {
@@ -68,7 +71,7 @@ public class Util {
         toNode.clear();
         Arrays.sort(items, RecentItem.getTimeComparator(true)); // Reverse order
         for (int i = 0; i < items.length && i < maxNbrofItems; i++) {
-            toNode.put("item"+i, items[i].asPersistentData());
+            toNode.put("item" + i, items[i].asPersistentData());
         }
         toNode.flush();
     }
@@ -87,12 +90,12 @@ public class Util {
         }
         return ret;
     }
-    
+
     public static String[] split(CharSequence s, Pattern matchPattern) {
         ArrayList<String> matchList = new ArrayList<String>();
         Matcher m = matchPattern.matcher(s);
 
-        while(m.find()) {
+        while (m.find()) {
             String match = m.group(1);//s.subSequence(m.start(1), m.end(1)).toString();
             if (match == null) {
                 match = m.group();
@@ -115,5 +118,63 @@ public class Util {
     }
 
     private Util() {
+    }
+
+    private static class MouseDblClickListener extends MouseAdapter {
+        JButton defaultButton;
+
+        public MouseDblClickListener(JButton defaultButton) {
+            this.defaultButton = defaultButton;
+        }
+
+        @Override
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            if (evt.getClickCount() == 2) {
+                if (defaultButton != null) {
+                    defaultButton.doClick();
+                }
+            }
+        }
+    }
+
+    private static class EnterKeyListener extends KeyAdapter {
+        JButton defaultButton;
+
+        public EnterKeyListener(JButton defaultButton) {
+            this.defaultButton = defaultButton;
+        }
+
+        @Override
+        public void keyPressed(java.awt.event.KeyEvent evt) {
+            // Deliberately swallow ENTER key
+            if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+                evt.consume();
+            }
+        }
+
+        @Override
+        public void keyReleased(java.awt.event.KeyEvent evt) {
+            if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+                if (defaultButton != null) {
+                    defaultButton.doClick();
+                }
+            }
+        }
+    }
+
+    private static class DefaultButtonEnabler implements ListSelectionListener {
+        private final JTable list;
+        private final JButton defaultButton;
+
+        public DefaultButtonEnabler(JTable list, JButton defaultButton) {
+            this.list = list;
+            this.defaultButton = defaultButton;
+        }
+
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            boolean cond = list.getSelectedRow() >= 0;
+            defaultButton.setEnabled(cond);
+        }
     }
 }

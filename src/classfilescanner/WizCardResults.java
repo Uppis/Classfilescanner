@@ -163,6 +163,7 @@ public class WizCardResults extends javax.swing.JPanel implements WizardCard {
 
         lblRefCount2.setText("classes containing references");
 
+        cmdOpen.setMnemonic('o');
         cmdOpen.setText("Open...");
         cmdOpen.setEnabled(false);
         cmdOpen.setMaximumSize(new java.awt.Dimension(98, 23));
@@ -175,6 +176,7 @@ public class WizCardResults extends javax.swing.JPanel implements WizardCard {
             }
         });
 
+        cmdReport.setMnemonic('r');
         cmdReport.setText("Report...");
         cmdReport.setEnabled(false);
         cmdReport.addActionListener(new java.awt.event.ActionListener() {

@@ -1,10 +1,6 @@
-/*
- * MemberPanel.java
- *
- * Created on 12. kesäkuuta 2007, 9:20
- */
 package classfilescanner;
 
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
@@ -12,8 +8,6 @@ import java.util.logging.Logger;
 import java.util.zip.*;
 import javax.swing.*;
 
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableRowSorter;
 import wizard.*;
 import zup.ZupTableModel;
@@ -25,27 +19,23 @@ import zup.ZupTableModel;
 public class WizCardArchive extends javax.swing.JPanel implements WizardCard {
 
     private static final Logger logger = Logger.getLogger(WizCardArchive.class.getPackage().getName());
-    private Wizard<Property> wizard;
-    private ZupTableModel archiveModel = new ZupTableModel();
-    private ArchivePropertyListener archivePropListener = new ArchivePropertyListener();
+    private final Wizard<Property> wizard;
+    private final ZupTableModel archiveModel = new ZupTableModel();
+    private final ArchivePropertyListener archivePropListener = new ArchivePropertyListener();
 
     public WizCardArchive(Wizard<Property> wiz) {
         initComponents();
-        lstContents.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
-            public void valueChanged(ListSelectionEvent e) {
-                boolean cond = lstContents.getSelectedRow() >= 0;
-                cmdNext.setEnabled(cond);
-            }
-        });
+        Util.setListSelectionListeners(lstContents, cmdNext);
         wizard = wiz;
         wizard.addPropertyChangeListener(Property.ARCHIVE, archivePropListener);
     }
 
+    @Override
     public void init() {
         logger.fine("WizCardArchive inited");
     }
 
+    @Override
     public void activate() {
         logger.fine("WizCardArchive activated");
         getRootPane().setDefaultButton(cmdNext);
@@ -53,12 +43,13 @@ public class WizCardArchive extends javax.swing.JPanel implements WizardCard {
         wizard.setProperty(Property.CLASS_FILE, null);
     }
 
+    @Override
     public void passivate() {
         logger.fine("WizCardMembers passivated");
     }
 
     private class ArchivePropertyListener implements PropertyChangeListener {
-
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             archiveModel.setFile(null);
             ZipFile zf = (ZipFile) evt.getNewValue();
@@ -125,17 +116,16 @@ public class WizCardArchive extends javax.swing.JPanel implements WizardCard {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 496, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(cmdPrev, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmdNext, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addComponent(lblArchive, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
                         .addGap(10, 10, 10)
-                        .addComponent(fldArchive, javax.swing.GroupLayout.DEFAULT_SIZE, 496, Short.MAX_VALUE))
-                    .addComponent(lblArchive, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 496, Short.MAX_VALUE)
+                            .addComponent(fldArchive, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 496, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -174,6 +164,7 @@ public class WizCardArchive extends javax.swing.JPanel implements WizardCard {
     private void cmdPrevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdPrevActionPerformed
         wizard.previousPhase();
     }//GEN-LAST:event_cmdPrevActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdNext;
     private javax.swing.JButton cmdPrev;

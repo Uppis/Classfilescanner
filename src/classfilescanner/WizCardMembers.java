@@ -21,20 +21,25 @@ import wizard.*;
 public class WizCardMembers extends javax.swing.JPanel implements WizardCard {
 
     private static final Logger logger = Logger.getLogger(WizCardMembers.class.getPackage().getName());
-    private Wizard<Property> wizard;
-    private MemberTableModel memberListModel = new MemberTableModel();
-    private ClassFilePropertyListener classFilePropListener = new ClassFilePropertyListener();
+    private final Wizard<Property> wizard;
+    private final MemberTableModel memberListModel;
+    private final ClassFilePropertyListener classFilePropListener;
 
     public WizCardMembers(Wizard<Property> wiz) {
+        this.classFilePropListener = new ClassFilePropertyListener();
+        this.memberListModel = new MemberTableModel();
         initComponents();
+        Util.setListSelectionListeners(lstMembers, cmdNext);
         wizard = wiz;
         wizard.addPropertyChangeListener(Property.CLASS_FILE, classFilePropListener);
     }
 
+    @Override
     public void init() {
         logger.fine("WizCardMembers inited");
     }
 
+    @Override
     public void activate() {
         logger.fine("WizCardMembers activated");
         getRootPane().setDefaultButton(cmdNext);
@@ -42,11 +47,13 @@ public class WizCardMembers extends javax.swing.JPanel implements WizardCard {
         wizard.setProperty(Property.REFERENCES, null);
     }
 
+    @Override
     public void passivate() {
         logger.fine("WizCardMembers passivated");
     }
 
     private class ClassFilePropertyListener implements PropertyChangeListener {
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             memberListModel.clearData();
             fldMemberOfTheClass.setText("");
@@ -170,6 +177,7 @@ public class WizCardMembers extends javax.swing.JPanel implements WizardCard {
 private void cmdPrevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdPrevActionPerformed
     wizard.previousPhase();
 }//GEN-LAST:event_cmdPrevActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdNext;
     private javax.swing.JButton cmdPrev;
