@@ -131,6 +131,7 @@ public class Util {
         public void mouseClicked(java.awt.event.MouseEvent evt) {
             if (evt.getClickCount() == 2) {
                 if (defaultButton != null) {
+                    evt.consume();
                     defaultButton.doClick();
                 }
             }

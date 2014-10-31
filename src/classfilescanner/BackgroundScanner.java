@@ -32,21 +32,15 @@ import javax.swing.tree.MutableTreeNode;
  * @author z705692
  */
 public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNode> {
-    private static FileFilter classFileFilter = new ClassFileFilter();
-    private File rootForScan;
-    private Collection<Reference> references;
-    private Collection<Reference> excludes;
+    private static final FileFilter classFileFilter = new ClassFileFilter();
+    private final File rootForScan;
+    private final Collection<Reference> references;
+    private final Collection<Reference> excludes;
     Set<Reference> foundReferences = new TreeSet<Reference>(); // Sorted according to the natural order of elements (see String compareTo)
     private int nbrofScannedClasses;
-    private DefaultTreeModel model;
+    private final DefaultTreeModel model;
 
-    /**
-     * Creates a new instance of BackgroundScanner
-     *
-     * @param root
-     * @param refs
-     * @param mod
-     */
+
     public BackgroundScanner(File root, Collection<Reference> refs, Collection<Reference> excls, DefaultTreeModel mod) {
         rootForScan = root;
         references = refs;
@@ -83,6 +77,10 @@ public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNo
 
     public int getNbrofScannedClasses() {
         return nbrofScannedClasses;
+    }
+
+    public int getNbrofFoundReferences() {
+        return foundReferences.size();
     }
 
     private void scanDir(File dir) throws IOException {
