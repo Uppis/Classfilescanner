@@ -104,15 +104,13 @@ public class FrmDump extends javax.swing.JDialog {
         dispose();
     }//GEN-LAST:event_cmdCloseActionPerformed
     
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) throws IOException {
+    public static void main(String args[]) throws IOException, InvalidClassFileException {
         if (args.length == 0) {
             System.out.println("Usage: java classfilescanner.FrmDump <classfile>");
         }
         final FrmDump frm = args.length == 0 ? new FrmDump(null, true) : new FrmDump(null, true, new ClassFile(new java.io.FileInputStream(args[0])));
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 frm.supportDnD();
                 frm.setVisible(true);
@@ -121,6 +119,7 @@ public class FrmDump extends javax.swing.JDialog {
     }
 
     private class DialogTransferHandler extends TransferHandler {
+        @Override
         public boolean canImport(TransferHandler.TransferSupport support) {
             boolean ret = false;
             if (support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
@@ -132,6 +131,7 @@ public class FrmDump extends javax.swing.JDialog {
             return ret;
         }
 
+        @Override
         public boolean importData(TransferHandler.TransferSupport support) {
             boolean ret = false;
             if (canImport(support)) {
@@ -147,6 +147,8 @@ public class FrmDump extends javax.swing.JDialog {
                     ret = false;
                 } catch (IOException e) {
                     ret = false;
+                } catch (InvalidClassFileException ex) {
+                    ret = false;
                 }
             }
             return ret;
@@ -159,6 +161,7 @@ public class FrmDump extends javax.swing.JDialog {
             super(delegate);
         }
 
+        @Override
         public boolean canImport(TransferHandler.TransferSupport support) {
             boolean ret = meCanImport(support);
             if (ret == false) {
@@ -167,8 +170,9 @@ public class FrmDump extends javax.swing.JDialog {
             return ret;
         }
 
+        @Override
         public boolean importData(TransferHandler.TransferSupport support) {
-            boolean ret = false;
+            boolean ret;
             if (meCanImport(support)) {
                 Transferable t = support.getTransferable();
                 try {
@@ -181,6 +185,8 @@ public class FrmDump extends javax.swing.JDialog {
                 } catch (UnsupportedFlavorException e) {
                     return false;
                 } catch (IOException e) {
+                    return false;
+                } catch (InvalidClassFileException ex) {
                     return false;
                 }
             } else {

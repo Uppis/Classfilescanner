@@ -1,6 +1,6 @@
 package classfilescanner;
 
-import java.awt.event.KeyEvent;
+import classfile.InvalidClassFileException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
@@ -18,7 +18,7 @@ import zup.ZupTableModel;
  */
 public class WizCardArchive extends javax.swing.JPanel implements WizardCard {
 
-    private static final Logger logger = Logger.getLogger(WizCardArchive.class.getPackage().getName());
+    private static final Logger LOGGER = Logger.getLogger(WizCardArchive.class.getPackage().getName());
     private final Wizard<Property> wizard;
     private final ZupTableModel archiveModel = new ZupTableModel();
     private final ArchivePropertyListener archivePropListener = new ArchivePropertyListener();
@@ -32,12 +32,12 @@ public class WizCardArchive extends javax.swing.JPanel implements WizardCard {
 
     @Override
     public void init() {
-        logger.fine("WizCardArchive inited");
+        LOGGER.fine("WizCardArchive inited");
     }
 
     @Override
     public void activate() {
-        logger.fine("WizCardArchive activated");
+        LOGGER.fine("WizCardArchive activated");
         getRootPane().setDefaultButton(cmdNext);
         lstContents.requestFocusInWindow();
         wizard.setProperty(Property.CLASS_FILE, null);
@@ -45,7 +45,7 @@ public class WizCardArchive extends javax.swing.JPanel implements WizardCard {
 
     @Override
     public void passivate() {
-        logger.fine("WizCardMembers passivated");
+        LOGGER.fine("WizCardMembers passivated");
     }
 
     private class ArchivePropertyListener implements PropertyChangeListener {
@@ -154,7 +154,7 @@ public class WizCardArchive extends javax.swing.JPanel implements WizardCard {
                 classfile.ClassFile cf = new classfile.ClassFile(zf.getInputStream(ze));
                 wizard.setProperty(classfilescanner.Property.CLASS_FILE, cf);
                 wizard.nextPhase();
-            } catch (IOException ex) {
+            } catch (IOException | InvalidClassFileException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Invalid file", JOptionPane.ERROR_MESSAGE);
             }
         } else {

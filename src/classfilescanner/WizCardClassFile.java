@@ -24,11 +24,11 @@ import java.util.logging.Logger;
  */
 public class WizCardClassFile extends javax.swing.JPanel implements WizardCard, PropertyChangeListener {
 
-    private static final Logger logger = Logger.getLogger(WizCardClassFile.class.getPackage().getName());
-    private static final javax.swing.filechooser.FileFilter classFileFilter = new FileNameExtensionFilter("Java class file", "class");
-    private static javax.swing.filechooser.FileFilter archiveFileFilter = new FileNameExtensionFilter("Archive file", "zip", "jar");
-    private static final Pattern userInputPattern = Pattern.compile("\"(.*)\"|(\\S+)");
-    private Wizard<Property> wizard;
+    private static final Logger LOGGER = Logger.getLogger(WizCardClassFile.class.getPackage().getName());
+    private static final javax.swing.filechooser.FileFilter CLASSFILEFILTER = new FileNameExtensionFilter("Java class file", "class");
+    private static final javax.swing.filechooser.FileFilter ARCHIVEFILEFILTER = new FileNameExtensionFilter("Archive file", "zip", "jar");
+    private static final Pattern USERINPUTPATTERN = Pattern.compile("\"(.*)\"|(\\S+)");
+    private final Wizard<Property> wizard;
 
     public WizCardClassFile(Wizard<Property> wiz, MutableComboBoxModel recentClasses) {
         initComponents();
@@ -36,25 +36,28 @@ public class WizCardClassFile extends javax.swing.JPanel implements WizardCard, 
         ((JTextField) fldClassFile.getEditor().getEditorComponent()).addPropertyChangeListener(this);
         fldClassFile.setModel(recentClasses);
         wizard = wiz;
-        classFileChooser.addChoosableFileFilter(archiveFileFilter);
-        classFileChooser.addChoosableFileFilter(classFileFilter);
+        classFileChooser.addChoosableFileFilter(ARCHIVEFILEFILTER);
+        classFileChooser.addChoosableFileFilter(CLASSFILEFILTER);
     }
 
+    @Override
     public void init() {
-        logger.fine("WizCardClassFile inited");
+        LOGGER.fine("WizCardClassFile inited");
         fldClassFile.setSelectedItem(null);
     }
 
+    @Override
     public void activate() {
-        logger.fine("WizCardClassFile activated");
+        LOGGER.fine("WizCardClassFile activated");
         getRootPane().setDefaultButton(cmdNext);
         fldClassFile.requestFocusInWindow();
         wizard.setProperty(Property.CLASS_FILE, null);
         wizard.setProperty(Property.REFERENCES, null);
     }
 
+    @Override
     public void passivate() {
-        logger.fine("WizCardClassFile passivated");
+        LOGGER.fine("WizCardClassFile passivated");
     }
 
     /** This method is called from within the constructor to
@@ -156,12 +159,12 @@ public class WizCardClassFile extends javax.swing.JPanel implements WizardCard, 
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdNextActionPerformed
-        String[] parts = Util.split(String.valueOf(fldClassFile.getSelectedItem()), userInputPattern);
+        String[] parts = Util.split(String.valueOf(fldClassFile.getSelectedItem()), USERINPUTPATTERN);
         File f = new File(parts[0]);
         if (f.exists()) {
             if (f.isDirectory()) {
                 cmdBrowseActionPerformed(evt);
-            } else if (archiveFileFilter.accept(f)) {
+            } else if (ARCHIVEFILEFILTER.accept(f)) {
                 try {
                     java.util.zip.ZipFile zf = new java.util.zip.ZipFile(f);
                     Util.updateComboList(fldClassFile);
@@ -176,7 +179,7 @@ public class WizCardClassFile extends javax.swing.JPanel implements WizardCard, 
                     Util.updateComboList(fldClassFile);
                     wizard.setProperty(Property.CLASS_FILE, cf);
                     wizard.nextPhase();
-                } catch (IOException ex) {
+                } catch (IOException | InvalidClassFileException ex) {
                     JOptionPane.showMessageDialog(this, ex, "Error reading file: " + f, JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -210,6 +213,7 @@ public class WizCardClassFile extends javax.swing.JPanel implements WizardCard, 
     private javax.swing.JLabel lblClassFile;
     // End of variables declaration//GEN-END:variables
 
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
     }
 }

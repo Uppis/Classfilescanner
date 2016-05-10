@@ -9,10 +9,10 @@
 package classfilescanner;
 
 import classfile.ClassFile;
+import classfile.InvalidClassFileException;
 import classfile.Reference;
 import filetree.*;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,14 +32,12 @@ import javax.swing.tree.MutableTreeNode;
  * @author z705692
  */
 public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNode> {
-    private static final FileFilter classFileFilter = new ClassFileFilter();
     private final File rootForScan;
     private final Collection<Reference> references;
     private final Collection<Reference> excludes;
     Set<Reference> foundReferences = new TreeSet<Reference>(); // Sorted according to the natural order of elements (see String compareTo)
     private int nbrofScannedClasses;
     private final DefaultTreeModel model;
-
 
     public BackgroundScanner(File root, Collection<Reference> refs, Collection<Reference> excls, DefaultTreeModel mod) {
         rootForScan = root;
@@ -117,32 +115,31 @@ public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNo
     }
 
     private boolean scanTarget(ScanTarget target) throws IOException {
-//        String pathName = target.getName();
-//        if (pathName.endsWith(".class")) {
-        ClassFile cf = new ClassFile(target.getInputStream());
-        Collection<Reference> refs = filetree.Util.findReferences(references, cf, excludes);
-        if (refs.size() > 0) {
-            MutableTreeNode classNode = new DefaultMutableTreeNode(cf);//target.getName());
-            for (Reference r : refs) {
-                DefaultMutableTreeNode refNode = new DefaultMutableTreeNode(r);
-                refNode.setAllowsChildren(false);
-                classNode.insert(refNode, classNode.getChildCount());
+        try {
+            ClassFile cf = new ClassFile(target.getInputStream());
+            Collection<Reference> refs = filetree.Util.findReferences(references, cf, excludes);
+            if (refs.size() > 0) {
+                MutableTreeNode classNode = new DefaultMutableTreeNode(cf);//target.getName());
+                for (Reference r : refs) {
+                    DefaultMutableTreeNode refNode = new DefaultMutableTreeNode(r);
+                    refNode.setAllowsChildren(false);
+                    classNode.insert(refNode, classNode.getChildCount());
+                }
+                publish(classNode);
+                foundReferences.addAll(refs);
             }
-            publish(classNode);
-            foundReferences.addAll(refs);
+            int oldCount = nbrofScannedClasses;
+            getPropertyChangeSupport().firePropertyChange("nbrofScannedClasses", oldCount, ++nbrofScannedClasses);
+        } catch (InvalidClassFileException e) {
+            System.out.println("Invalid class: " + target.getName());
         }
-//        } else {
-//            System.err.println("Not a class file: " + target);
-//        }
-        int oldCount = nbrofScannedClasses;
-        getPropertyChangeSupport().firePropertyChange("nbrofScannedClasses", oldCount, ++nbrofScannedClasses);
         return true;
     }
 
     @Override
     protected void process(List<MutableTreeNode> nodes) {
         if (model != null) {
-            MutableTreeNode rootNode = (MutableTreeNode) model.getRoot();
+            MutableTreeNode rootNode = (MutableTreeNode)model.getRoot();
             for (MutableTreeNode n : nodes) {
                 model.insertNodeInto(n, rootNode, rootNode.getChildCount());
             }
