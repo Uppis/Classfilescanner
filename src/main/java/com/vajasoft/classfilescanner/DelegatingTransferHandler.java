@@ -1,4 +1,4 @@
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;

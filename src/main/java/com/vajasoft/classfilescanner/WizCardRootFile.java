@@ -1,10 +1,7 @@
-/*
- * RootFilePanel.java
- *
- * Created on 8. kesäkuuta 2007, 15:48
- */
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
+import com.vajasoft.wizard.Wizard;
+import com.vajasoft.wizard.WizardCard;
 import java.io.*;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
@@ -12,16 +9,14 @@ import java.util.zip.ZipException;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import wizard.*;
-
 /**
  *
  * @author  z705692
  */
 public class WizCardRootFile extends javax.swing.JPanel implements WizardCard {
-    private static final Logger logger = Logger.getLogger(WizCardRootFile.class.getPackage().getName());
-    private static javax.swing.filechooser.FileFilter archiveFileFilter = new FileNameExtensionFilter("Archive file", "zip", "jar", "war", "ear");
-    private Wizard<Property> wizard;
+    private static final Logger LOGGER = Logger.getLogger(WizCardRootFile.class.getPackage().getName());
+    private static final javax.swing.filechooser.FileFilter archiveFileFilter = new FileNameExtensionFilter("Archive file", "zip", "jar", "war", "ear");
+    private final Wizard<Property> wizard;
 
     public WizCardRootFile(Wizard<Property> wiz, MutableComboBoxModel recentRoots) {
         initComponents();
@@ -30,20 +25,23 @@ public class WizCardRootFile extends javax.swing.JPanel implements WizardCard {
         wizard = wiz;
     }
 
+    @Override
     public void init() {
-        logger.fine("WizCardRootFile inited");
+        LOGGER.fine("WizCardRootFile inited");
         fldRootDir.setSelectedItem(null);
     }
 
+    @Override
     public void activate() {
-        logger.fine("WizCardRootFile activated");
+        LOGGER.fine("WizCardRootFile activated");
         getRootPane().setDefaultButton(cmdNext);
         fldRootDir.requestFocusInWindow();
         wizard.setProperty(Property.ROOT_FILE, null);
     }
 
+    @Override
     public void passivate() {
-        logger.fine("WizCardRootFile passivated");
+        LOGGER.fine("WizCardRootFile passivated");
     }
 
     /** This method is called from within the constructor to

@@ -1,20 +1,16 @@
-/*
- * ClassFilePanel.java
- *
- * Created on 11. kesäkuuta 2007, 10:35
- */
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
+import com.vajasoft.classfile.ClassFile;
+import com.vajasoft.classfile.Reference;
+import com.vajasoft.wizard.Wizard;
+import com.vajasoft.wizard.WizardCard;
 import java.beans.PropertyChangeEvent;
-import wizard.WizardCard;
-import wizard.Wizard;
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import classfile.*;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Logger;
 
@@ -168,7 +164,7 @@ public class WizCardClassFile extends javax.swing.JPanel implements WizardCard, 
                 try {
                     java.util.zip.ZipFile zf = new java.util.zip.ZipFile(f);
                     Util.updateComboList(fldClassFile);
-                    wizard.setProperty(classfilescanner.Property.ARCHIVE, zf);
+                    wizard.setProperty(com.vajasoft.classfilescanner.Property.ARCHIVE, zf);
                     wizard.nextPhase();
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(this, ex, "Error reading file: " + f, JOptionPane.ERROR_MESSAGE);
@@ -179,7 +175,7 @@ public class WizCardClassFile extends javax.swing.JPanel implements WizardCard, 
                     Util.updateComboList(fldClassFile);
                     wizard.setProperty(Property.CLASS_FILE, cf);
                     wizard.nextPhase();
-                } catch (IOException | InvalidClassFileException ex) {
+                } catch (IOException ex) {
                     JOptionPane.showMessageDialog(this, ex, "Error reading file: " + f, JOptionPane.ERROR_MESSAGE);
                 }
             }

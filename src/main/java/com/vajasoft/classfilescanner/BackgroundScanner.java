@@ -1,17 +1,12 @@
-/*
- * BackgroundScanner.java
- *
- * Created on 11. toukokuuta 2007, 13:14
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
-import classfile.ClassFile;
-import classfile.InvalidClassFileException;
-import classfile.Reference;
-import filetree.*;
+import com.vajasoft.classfile.ClassFile;
+import com.vajasoft.classfile.InvalidClassFileException;
+import com.vajasoft.classfile.Reference;
+import com.vajasoft.filetree.UsageException;
+import com.vajasoft.filetree.FileTarget;
+import com.vajasoft.filetree.ZipInputStreamTarget;
+import com.vajasoft.filetree.ScanTarget;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,14 +30,14 @@ public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNo
     private final File rootForScan;
     private final Collection<Reference> references;
     private final Collection<Reference> excludes;
-    Set<Reference> foundReferences = new TreeSet<Reference>(); // Sorted according to the natural order of elements (see String compareTo)
+    Set<Reference> foundReferences = new TreeSet<>(); // Sorted according to the natural order of elements (see String compareTo)
     private int nbrofScannedClasses;
     private final DefaultTreeModel model;
 
     public BackgroundScanner(File root, Collection<Reference> refs, Collection<Reference> excls, DefaultTreeModel mod) {
         rootForScan = root;
         references = refs;
-        excludes = excls != null ? excls : new ArrayList<Reference>();
+        excludes = excls != null ? excls : new ArrayList<>();
         model = mod;
     }
 
@@ -117,7 +112,7 @@ public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNo
     private boolean scanTarget(ScanTarget target) throws IOException {
         try {
             ClassFile cf = new ClassFile(target.getInputStream());
-            Collection<Reference> refs = filetree.Util.findReferences(references, cf, excludes);
+            Collection<Reference> refs = com.vajasoft.filetree.Util.findReferences(references, cf, excludes);
             if (refs.size() > 0) {
                 MutableTreeNode classNode = new DefaultMutableTreeNode(cf);//target.getName());
                 for (Reference r : refs) {

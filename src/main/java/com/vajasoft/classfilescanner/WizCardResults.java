@@ -1,10 +1,9 @@
-/*
- * WizCardResults.java
- *
- * Created on 13. kesäkuuta 2007, 10:04
- */
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
+import com.vajasoft.classfile.ClassFile;
+import com.vajasoft.classfile.Reference;
+import com.vajasoft.wizard.Wizard;
+import com.vajasoft.wizard.WizardCard;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -15,19 +14,15 @@ import java.util.logging.Level;
 import javax.swing.SwingWorker;
 import javax.swing.event.*;
 import javax.swing.tree.*;
-
-import classfile.ClassFile;
-import classfile.Reference;
 import java.util.Set;
 import java.util.logging.Logger;
-import wizard.*;
 
 /**
  *
  * @author z705692
  */
 public class WizCardResults extends javax.swing.JPanel implements WizardCard {
-    private static final Logger logger = Logger.getLogger(WizCardResults.class.getPackage().getName());
+    private static final Logger LOGGER = Logger.getLogger(WizCardResults.class.getPackage().getName());
     private final Wizard<Property> wizard;
     private final DefaultTreeModel resultTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("Results"));
     private SwingWorker backgroundScanner;
@@ -43,7 +38,7 @@ public class WizCardResults extends javax.swing.JPanel implements WizardCard {
             @Override
             public void valueChanged(TreeSelectionEvent e) {
                 TreePath tp = e.getNewLeadSelectionPath();
-                cmdOpen.setEnabled(tp != null && ((DefaultMutableTreeNode)tp.getLastPathComponent()).getUserObject() instanceof classfile.ClassFile);
+                cmdOpen.setEnabled(tp != null && ((DefaultMutableTreeNode)tp.getLastPathComponent()).getUserObject() instanceof ClassFile);
                 getRootPane().setDefaultButton(cmdOpen);
             }
         });
@@ -53,12 +48,12 @@ public class WizCardResults extends javax.swing.JPanel implements WizardCard {
 
     @Override
     public void init() {
-        logger.fine("WizCardResults inited");
+        LOGGER.fine("WizCardResults inited");
     }
 
     @Override
     public void activate() {
-        logger.fine("WizCardResults activated");
+        LOGGER.fine("WizCardResults activated");
         getRootPane().setDefaultButton(null);
         ((DefaultMutableTreeNode)resultTreeModel.getRoot()).removeAllChildren();
         resultTreeModel.reload();
@@ -70,7 +65,7 @@ public class WizCardResults extends javax.swing.JPanel implements WizardCard {
 
     @Override
     public void passivate() {
-        logger.fine("WizCardResults passivated");
+        LOGGER.fine("WizCardResults passivated");
         backgroundScanner.cancel(true);
     }
 
@@ -264,7 +259,7 @@ private void cmdPrevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
 private void lstFoundReferencesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstFoundReferencesMouseClicked
     if (evt.getButton() == java.awt.event.MouseEvent.BUTTON1 && evt.getClickCount() == 2) {
         TreePath tp = lstFoundReferences.getClosestPathForLocation(evt.getX(), evt.getY());
-        if (tp != null && ((DefaultMutableTreeNode)tp.getLastPathComponent()).getUserObject() instanceof classfile.ClassFile) {
+        if (tp != null && ((DefaultMutableTreeNode)tp.getLastPathComponent()).getUserObject() instanceof ClassFile) {
             evt.consume();
             openDump();
         }
@@ -279,10 +274,8 @@ private void lstFoundReferencesMouseClicked(java.awt.event.MouseEvent evt) {//GE
                 report.setLocationRelativeTo(this);
                 report.setVisible(true);
             }
-        } catch (InterruptedException ex) {
-            logger.log(Level.SEVERE, "Failed to get scan results", ex);
-        } catch (ExecutionException ex) {
-            logger.log(Level.SEVERE, "Failed to get scan results", ex);
+        } catch (InterruptedException | ExecutionException ex) {
+            LOGGER.log(Level.SEVERE, "Failed to get scan results", ex);
         }
     }//GEN-LAST:event_cmdReportActionPerformed
 

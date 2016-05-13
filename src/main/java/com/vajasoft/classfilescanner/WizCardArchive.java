@@ -1,6 +1,9 @@
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
-import classfile.InvalidClassFileException;
+import com.vajasoft.classfile.ClassFile;
+import com.vajasoft.wizard.Wizard;
+import com.vajasoft.wizard.WizardCard;
+import com.vajasoft.zup.ZupTableModel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
@@ -9,8 +12,6 @@ import java.util.zip.*;
 import javax.swing.*;
 
 import javax.swing.table.TableRowSorter;
-import wizard.*;
-import zup.ZupTableModel;
 
 /**
  *
@@ -151,10 +152,10 @@ public class WizCardArchive extends javax.swing.JPanel implements WizardCard {
             try {
                 java.util.zip.ZipFile zf = (java.util.zip.ZipFile) wizard.getProperty(Property.ARCHIVE);
                 java.util.zip.ZipEntry ze = archiveModel.getValue(lstContents.convertRowIndexToModel(rowInView));
-                classfile.ClassFile cf = new classfile.ClassFile(zf.getInputStream(ze));
-                wizard.setProperty(classfilescanner.Property.CLASS_FILE, cf);
+                ClassFile cf = new ClassFile(zf.getInputStream(ze));
+                wizard.setProperty(com.vajasoft.classfilescanner.Property.CLASS_FILE, cf);
                 wizard.nextPhase();
-            } catch (IOException | InvalidClassFileException ex) {
+            } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Invalid file", JOptionPane.ERROR_MESSAGE);
             }
         } else {

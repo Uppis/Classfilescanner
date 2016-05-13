@@ -1,4 +1,4 @@
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;

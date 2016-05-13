@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
 
 public enum Property {ROOT_FILE, ARCHIVE, CLASS_FILE, INCLUDE_REF, REFERENCES, EXCLUDE_REF, EXCLUDES, SCANNER, RESULTS}

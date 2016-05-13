@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
 /**
  *

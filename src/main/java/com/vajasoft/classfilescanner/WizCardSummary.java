@@ -1,19 +1,13 @@
-/*
- * WizCardSummary.java
- *
- * Created on 13. kesäkuuta 2007, 10:02
- */
+package com.vajasoft.classfilescanner;
 
-package classfilescanner;
-
+import com.vajasoft.classfile.Reference;
+import com.vajasoft.wizard.Wizard;
+import com.vajasoft.wizard.WizardCard;
 import java.io.*;
 import java.util.*;
-
-import classfile.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Logger;
-import wizard.*;
 
 
 /**
@@ -21,11 +15,11 @@ import wizard.*;
  * @author  z705692
  */
 public class WizCardSummary extends javax.swing.JPanel implements WizardCard {
-    private static final Logger logger = Logger.getLogger(WizCardSummary.class.getPackage().getName());
-    private Wizard<Property> wizard;
-    private ReferenceTableModel referenceListModel = new ReferenceTableModel();
-    private ReferencePropertyListener refPropListener = new ReferencePropertyListener();
-    private RootFilePropertyListener rootFilePropListener = new RootFilePropertyListener();
+    private static final Logger LOGGER = Logger.getLogger(WizCardSummary.class.getPackage().getName());
+    private final Wizard<Property> wizard;
+    private final ReferenceTableModel referenceListModel = new ReferenceTableModel();
+    private final ReferencePropertyListener refPropListener = new ReferencePropertyListener();
+    private final RootFilePropertyListener rootFilePropListener = new RootFilePropertyListener();
     
     public WizCardSummary(Wizard<Property> wiz) {
         initComponents();
@@ -34,21 +28,25 @@ public class WizCardSummary extends javax.swing.JPanel implements WizardCard {
         wizard.addPropertyChangeListener(Property.ROOT_FILE, rootFilePropListener);
     }
 
+    @Override
     public void init() {
-        logger.fine("WizCardSummary inited");
+        LOGGER.fine("WizCardSummary inited");
     }
 
+    @Override
     public void activate() {
-        logger.fine("WizCardSummary activated");
+        LOGGER.fine("WizCardSummary activated");
         getRootPane().setDefaultButton(cmdScan);
         cmdScan.requestFocusInWindow();
     }
     
+    @Override
     public void passivate() {
-        logger.fine("WizCardSummary passivated");
+        LOGGER.fine("WizCardSummary passivated");
     }
 
     private class ReferencePropertyListener implements PropertyChangeListener {
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             referenceListModel.clearData();
             Collection<Reference> refs = (Collection<Reference>)evt.getNewValue();
@@ -59,6 +57,7 @@ public class WizCardSummary extends javax.swing.JPanel implements WizardCard {
     }
 
     private class RootFilePropertyListener implements PropertyChangeListener {
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             File root = (File)evt.getNewValue();
             String r = root != null ? root.getAbsolutePath() : "";

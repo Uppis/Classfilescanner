@@ -1,16 +1,10 @@
-/*
- * FrmDump.java
- *
- * Created on 29. toukokuuta 2007, 9:57
- */
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
 import java.io.*;
-import classfile.*;
+import com.vajasoft.classfile.Reference;
 import java.util.Set;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 
 /**
  *

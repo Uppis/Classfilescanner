@@ -1,18 +1,16 @@
-/*
- * MemberPanel.java
- *
- * Created on 12. kesäkuuta 2007, 9:20
- */
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
+import com.vajasoft.classfile.ClassFile;
+import com.vajasoft.classfile.NameAndType;
+import com.vajasoft.classfile.Reference;
+import com.vajasoft.wizard.Wizard;
+import com.vajasoft.wizard.WizardCard;
 import java.util.*;
 
-import classfile.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Logger;
 import javax.swing.table.TableRowSorter;
-import wizard.*;
 
 /**
  *
@@ -20,7 +18,7 @@ import wizard.*;
  */
 public class WizCardMembers extends javax.swing.JPanel implements WizardCard {
 
-    private static final Logger logger = Logger.getLogger(WizCardMembers.class.getPackage().getName());
+    private static final Logger LOGGER = Logger.getLogger(WizCardMembers.class.getPackage().getName());
     private final Wizard<Property> wizard;
     private final MemberTableModel memberListModel;
     private final ClassFilePropertyListener classFilePropListener;
@@ -36,12 +34,12 @@ public class WizCardMembers extends javax.swing.JPanel implements WizardCard {
 
     @Override
     public void init() {
-        logger.fine("WizCardMembers inited");
+        LOGGER.fine("WizCardMembers inited");
     }
 
     @Override
     public void activate() {
-        logger.fine("WizCardMembers activated");
+        LOGGER.fine("WizCardMembers activated");
         getRootPane().setDefaultButton(cmdNext);
         lstMembers.requestFocusInWindow();
         wizard.setProperty(Property.REFERENCES, null);
@@ -49,7 +47,7 @@ public class WizCardMembers extends javax.swing.JPanel implements WizardCard {
 
     @Override
     public void passivate() {
-        logger.fine("WizCardMembers passivated");
+        LOGGER.fine("WizCardMembers passivated");
     }
 
     private class ClassFilePropertyListener implements PropertyChangeListener {
@@ -161,7 +159,7 @@ public class WizCardMembers extends javax.swing.JPanel implements WizardCard {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdNextActionPerformed
-        List<Reference> refs = new ArrayList<Reference>();
+        List<Reference> refs = new ArrayList<>();
         if (lstMembers.getSelectedRowCount() > 0) {
             for (int i : lstMembers.getSelectedRows()) {
                 NameAndType nt = memberListModel.getData(lstMembers.convertRowIndexToModel(i));

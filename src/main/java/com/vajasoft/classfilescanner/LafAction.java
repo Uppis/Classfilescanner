@@ -1,4 +1,4 @@
-package classfilescanner;
+package com.vajasoft.classfilescanner;
 
 import java.awt.Window;
 import java.awt.event.ActionEvent;
