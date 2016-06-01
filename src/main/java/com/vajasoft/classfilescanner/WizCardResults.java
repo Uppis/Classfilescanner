@@ -34,13 +34,10 @@ public class WizCardResults extends javax.swing.JPanel implements WizardCard {
         resultTreeModel.addTreeModelListener(new ResultModelListener());
         TreeSelectionModel selModel = lstFoundReferences.getSelectionModel();
         selModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        selModel.addTreeSelectionListener(new TreeSelectionListener() {
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                TreePath tp = e.getNewLeadSelectionPath();
-                cmdOpen.setEnabled(tp != null && ((DefaultMutableTreeNode)tp.getLastPathComponent()).getUserObject() instanceof ClassFile);
-                getRootPane().setDefaultButton(cmdOpen);
-            }
+        selModel.addTreeSelectionListener((TreeSelectionEvent e) -> {
+            TreePath tp = e.getNewLeadSelectionPath();
+            cmdOpen.setEnabled(tp != null && ((DefaultMutableTreeNode)tp.getLastPathComponent()).getUserObject() instanceof ClassFile);
+            getRootPane().setDefaultButton(cmdOpen);
         });
         wizard = wiz;
         wizard.addPropertyChangeListener(Property.ROOT_FILE, rootFilePropListener);
@@ -55,11 +52,13 @@ public class WizCardResults extends javax.swing.JPanel implements WizardCard {
     public void activate() {
         LOGGER.fine("WizCardResults activated");
         getRootPane().setDefaultButton(null);
-        ((DefaultMutableTreeNode)resultTreeModel.getRoot()).removeAllChildren();
+        File root = (File)wizard.getProperty(Property.ROOT_FILE);
+//        ((DefaultMutableTreeNode)resultTreeModel.getRoot()).removeAllChildren();
+        resultTreeModel.setRoot(new DefaultMutableTreeNode(root));
         resultTreeModel.reload();
         lstFoundReferences.requestFocusInWindow();
 
-        backgroundScanner = createScanner();
+        backgroundScanner = createScanner(root);
         backgroundScanner.execute();
     }
 
@@ -279,9 +278,9 @@ private void lstFoundReferencesMouseClicked(java.awt.event.MouseEvent evt) {//GE
         }
     }//GEN-LAST:event_cmdReportActionPerformed
 
-    private BackgroundScanner createScanner() {
+    private BackgroundScanner createScanner(File forRoot) {
         BackgroundScanner ret = new BackgroundScanner(
-                (File)wizard.getProperty(Property.ROOT_FILE),
+                forRoot,
                 (Collection<Reference>)wizard.getProperty(Property.REFERENCES),
                 (Collection<Reference>)wizard.getProperty(Property.EXCLUDES),
                 resultTreeModel);
@@ -318,9 +317,7 @@ private void lstFoundReferencesMouseClicked(java.awt.event.MouseEvent evt) {//GE
 
         @Override
         public void treeNodesInserted(TreeModelEvent e) {
-            TreeModel model = (TreeModel)e.getSource();
             lstFoundReferences.expandPath(e.getTreePath());
-            fldRefCount.setText(String.valueOf(model.getChildCount(model.getRoot())));
         }
 
         @Override
@@ -329,8 +326,6 @@ private void lstFoundReferencesMouseClicked(java.awt.event.MouseEvent evt) {//GE
 
         @Override
         public void treeStructureChanged(TreeModelEvent e) {
-            TreeModel model = (TreeModel)e.getSource();
-            fldRefCount.setText(String.valueOf(model.getChildCount(model.getRoot())));
         }
     }
 
@@ -340,6 +335,8 @@ private void lstFoundReferencesMouseClicked(java.awt.event.MouseEvent evt) {//GE
         public void propertyChange(PropertyChangeEvent evt) {
             if ("nbrofScannedClasses".equals(evt.getPropertyName())) {
                 fldScanCount.setText(String.valueOf(evt.getNewValue()));
+            } else if ("nbrofClassesWithRefs".equals(evt.getPropertyName())) {
+                fldRefCount.setText(String.valueOf(evt.getNewValue()));
             } else if ("state".equals(evt.getPropertyName())) {
                 boolean done = SwingWorker.StateValue.DONE.equals(evt.getNewValue());
                 fldScanCount.setForeground(done ? Color.BLACK : Color.RED);
