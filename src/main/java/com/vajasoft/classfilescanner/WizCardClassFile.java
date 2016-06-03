@@ -191,7 +191,7 @@ public class WizCardClassFile extends javax.swing.JPanel implements WizardCard, 
 }//GEN-LAST:event_cmdPrevActionPerformed
 
     private void cmdBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBrowseActionPerformed
-        File tmp = Util.getFile(String.valueOf(fldClassFile.getSelectedItem()));
+        File tmp = Util.getFileFromUserInput(String.valueOf(fldClassFile.getSelectedItem()));
         if (tmp != null) {
             classFileChooser.setCurrentDirectory(tmp);
         }

@@ -2,9 +2,11 @@ package com.vajasoft.classfilescanner;
 
 import java.io.*;
 import com.vajasoft.classfile.Reference;
+import java.util.Enumeration;
 import java.util.Set;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
 
 /**
  *
@@ -72,7 +74,7 @@ public class FrmReport extends javax.swing.JDialog {
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 634, Short.MAX_VALUE)
+                    .addComponent(jTabbedPane1)
                     .addContainerGap()))
         );
         layout.setVerticalGroup(
@@ -84,8 +86,8 @@ public class FrmReport extends javax.swing.JDialog {
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 422, Short.MAX_VALUE)
-                    .addContainerGap(43, Short.MAX_VALUE)))
+                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE)
+                    .addContainerGap(51, Short.MAX_VALUE)))
         );
 
         pack();
@@ -95,16 +97,30 @@ public class FrmReport extends javax.swing.JDialog {
         setTitle("Results Report");
         CharArrayWriter buf = new CharArrayWriter(8192);
         PrintWriter out = new PrintWriter(buf);
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)result.getRoot();
+        MutableTreeNode root = (MutableTreeNode)result.getRoot();
         if (root != null) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode)root.getFirstChild();
-            while (node != null) {
-                out.println(node);
-                node = node.getNextSibling();
-            }
+            printTree(root, out, 0);
             fldClasses.setText(buf.toString());
             fldClasses.setCaretPosition(0);
         }
+    }
+
+    private void printTree (TreeNode tree, PrintWriter to, int level) {
+        String prefix = getPrefix(level);
+        to.print(prefix);
+        to.println(tree);
+        Enumeration children = tree.children();
+        while (children.hasMoreElements()) {
+            printTree((TreeNode)children.nextElement(), to, level + 1);
+        }
+    }
+
+    private String getPrefix(int level) {
+        StringBuilder prefix = new StringBuilder();
+        for (int i = level; i> 0; i--) {
+            prefix.append("    ");
+        }
+        return prefix.toString();
     }
 
     private void setReferences(Set<Reference> refs) {

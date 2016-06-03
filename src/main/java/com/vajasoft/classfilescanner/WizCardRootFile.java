@@ -130,7 +130,7 @@ public class WizCardRootFile extends javax.swing.JPanel implements WizardCard {
 }//GEN-LAST:event_cmdNextActionPerformed
 
     private void cmdBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBrowseActionPerformed
-        File tmp = Util.getFile(String.valueOf(fldRootDir.getSelectedItem()));
+        File tmp = Util.getFileFromUserInput(String.valueOf(fldRootDir.getSelectedItem()));
         if (tmp != null) {
             rootFileChooser.setCurrentDirectory(tmp);
         }
@@ -141,7 +141,7 @@ public class WizCardRootFile extends javax.swing.JPanel implements WizardCard {
 }//GEN-LAST:event_cmdBrowseActionPerformed
 
     private File getRootForScan(String filename) throws InvalidFileException {
-        File root = Util.getFile(filename);
+        File root = Util.getFileFromUserInput(filename);
         if (root == null) {
             throw new InvalidFileException("File does not exist: " + filename);
         }

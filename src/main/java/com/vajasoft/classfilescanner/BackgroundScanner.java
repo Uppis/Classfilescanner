@@ -26,7 +26,7 @@ import javax.swing.tree.MutableTreeNode;
  *
  * @author z705692
  */
-public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNode> {
+public class BackgroundScanner extends SwingWorker<Set<Reference>, BackgroundScanner.NodePair> {
     private final File rootForScan;
     private final Collection<Reference> references;
     private final Collection<Reference> excludes;
@@ -34,7 +34,6 @@ public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNo
     private int nbrofScannedClasses;
     private int nbrofClassesWithRefs;
     private final DefaultTreeModel model;
-    private MutableTreeNode subTree;
 
     public BackgroundScanner(File root, Collection<Reference> refs, Collection<Reference> excls, DefaultTreeModel mod) {
         rootForScan = root;
@@ -48,12 +47,13 @@ public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNo
         getPropertyChangeSupport().firePropertyChange("nbrofScannedClasses", -1, nbrofScannedClasses); // "reset" to '0'
         getPropertyChangeSupport().firePropertyChange("nbrofClassesWithRefs", -1, nbrofClassesWithRefs); // "reset" to '0'
         try {
+            MutableTreeNode rootnode = (MutableTreeNode)model.getRoot();
             if (rootForScan.isDirectory()) {
-                scanDir(null, rootForScan);
+                scanDir(rootnode, rootForScan);
             } else {
-                FileInputStream fis = new FileInputStream(rootForScan);
-                scanArchive(null, new ZipInputStream(fis));
-                fis.close();
+                try (FileInputStream fis = new FileInputStream(rootForScan)) {
+                    scanArchive(rootnode, new ZipInputStream(fis));
+                }
             }
         } catch (Throwable t) {
             t.printStackTrace(System.err);
@@ -85,7 +85,6 @@ public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNo
 
     private boolean scanDir(MutableTreeNode dirNode, File dir) throws IOException {
         boolean foundRefs = false;
-//        File[] files = dir.listFiles(classFileFilter);// filter can be null !
         File[] files = dir.listFiles();
         for (File f : files) {
             if (isCancelled()) {
@@ -98,36 +97,36 @@ public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNo
             } else if (Util.isArchive(f.getName())) {
                 foundFromFile = scanArchive(fileNode, new ZipInputStream(new FileInputStream(f)));
             } else if (Util.isClassFile(f.getName())) {
-                FileInputStream fis = new FileInputStream(f);
-                foundFromFile = scanTarget(fileNode, new FileTarget(f, fis));
-                fis.close();
+                try (FileInputStream fis = new FileInputStream(f)) {
+                    foundFromFile = scanTarget(fileNode, new FileTarget(f, fis));
+                }
             }
             if (foundFromFile) {
-                handleResult(dirNode, fileNode);
+                publish(new NodePair(dirNode, fileNode));
                 foundRefs = true;
             }
         }
         return foundRefs;
     }
 
-    private boolean scanArchive(MutableTreeNode archiveNode, ZipInputStream zis) throws IOException {
+    private boolean scanArchive(MutableTreeNode archiveNode, ZipInputStream archive) throws IOException {
         boolean foundRefs = false;
-        ZipEntry e = zis.getNextEntry();
-        while (e != null && !isCancelled()) {
+        ZipEntry entry = archive.getNextEntry();
+        while (entry != null && !isCancelled()) {
             boolean foundFromEntry = false;
-            String name = e.getName();
+            String name = entry.getName();
             MutableTreeNode entryNode = new DefaultMutableTreeNode(name);
             if (Util.isClassFile(name)) {
-                foundFromEntry = scanTarget(entryNode, new ZipInputStreamTarget(zis, e));
+                foundFromEntry = scanTarget(entryNode, new ZipInputStreamTarget(archive, entry));
             } else if (Util.isArchive(name)) {
-                foundFromEntry = scanArchive(entryNode, new ZipInputStream(zis));
+                foundFromEntry = scanArchive(entryNode, new ZipInputStream(archive));
             }
-            zis.closeEntry();
+            archive.closeEntry();
             if (foundFromEntry) {
-                handleResult(archiveNode, entryNode);
+                publish(new NodePair(archiveNode, entryNode));
                 foundRefs = true;
             }
-            e = zis.getNextEntry();
+            entry = archive.getNextEntry();
         }
         return foundRefs;
     }
@@ -138,13 +137,12 @@ public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNo
             ClassFile cf = new ClassFile(target.getInputStream());
             Collection<Reference> refs = com.vajasoft.filetree.Util.findReferences(references, cf, excludes);
             if (refs.size() > 0) {
-//                MutableTreeNode classNode = new DefaultMutableTreeNode(cf);//target.getName());
+                classNode.setUserObject(cf);    // Need a ClassFile object instead of just the name
                 for (Reference r : refs) {
                     DefaultMutableTreeNode refNode = new DefaultMutableTreeNode(r);
                     refNode.setAllowsChildren(false);
-                    handleResult(classNode, refNode);
+                    classNode.insert(refNode, classNode.getChildCount());   // Ref nodes can be inserted as long as the class node hasn't been published
                 }
-//                publish(classNode);
                 foundReferences.addAll(refs);
                 getPropertyChangeSupport().firePropertyChange("nbrofClassesWithRefs", nbrofClassesWithRefs, ++nbrofClassesWithRefs);
                 foundRefs = true;
@@ -156,21 +154,31 @@ public class BackgroundScanner extends SwingWorker<Set<Reference>, MutableTreeNo
         return foundRefs;
     }
 
-    private void handleResult(MutableTreeNode parent, MutableTreeNode child) {
-        if (parent != null) {
-            parent.insert(child, parent.getChildCount());    // Append new child
-        } else {
-            publish(child);  // archive is the root, so can't modify the model directly in a background thread
+    @Override
+    protected void process(List<NodePair> nodes) {
+        if (model != null) {
+            for (NodePair n : nodes) {
+                MutableTreeNode parent = n.getParent();
+                model.insertNodeInto(n.getChild(), parent, parent.getChildCount());
+            }
         }
     }
 
-    @Override
-    protected void process(List<MutableTreeNode> nodes) {
-        if (model != null) {
-            MutableTreeNode rootNode = (MutableTreeNode)model.getRoot();
-            for (MutableTreeNode n : nodes) {
-                model.insertNodeInto(n, rootNode, rootNode.getChildCount());
-            }
+    public static class NodePair {
+        private final MutableTreeNode parent;
+        private final MutableTreeNode child;
+
+        public NodePair(MutableTreeNode parent, MutableTreeNode child) {
+            this.parent = parent;
+            this.child = child;
+        }
+
+        public MutableTreeNode getParent() {
+            return parent;
+        }
+
+        public MutableTreeNode getChild() {
+            return child;
         }
     }
 }

@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class WizCardResults extends javax.swing.JPanel implements WizardCard {
     private static final Logger LOGGER = Logger.getLogger(WizCardResults.class.getPackage().getName());
     private final Wizard<Property> wizard;
-    private final DefaultTreeModel resultTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("Results"));
+    private final DefaultTreeModel resultTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("<No results>"));
     private SwingWorker backgroundScanner;
     private final ScanPropertyListener scanPropListener = new ScanPropertyListener();
     private final RootFilePropertyListener rootFilePropListener = new RootFilePropertyListener();
@@ -317,7 +317,8 @@ private void lstFoundReferencesMouseClicked(java.awt.event.MouseEvent evt) {//GE
 
         @Override
         public void treeNodesInserted(TreeModelEvent e) {
-            lstFoundReferences.expandPath(e.getTreePath());
+            TreePath treePath = e.getTreePath();
+            lstFoundReferences.expandPath(treePath);
         }
 
         @Override
@@ -333,15 +334,21 @@ private void lstFoundReferencesMouseClicked(java.awt.event.MouseEvent evt) {//GE
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if ("nbrofScannedClasses".equals(evt.getPropertyName())) {
-                fldScanCount.setText(String.valueOf(evt.getNewValue()));
-            } else if ("nbrofClassesWithRefs".equals(evt.getPropertyName())) {
-                fldRefCount.setText(String.valueOf(evt.getNewValue()));
-            } else if ("state".equals(evt.getPropertyName())) {
-                boolean done = SwingWorker.StateValue.DONE.equals(evt.getNewValue());
-                fldScanCount.setForeground(done ? Color.BLACK : Color.RED);
-                cmdReport.setEnabled(done && ((BackgroundScanner)evt.getSource()).getNbrofFoundReferences() > 0);
-                //                saveAsMenuItem.setEnabled(true);
+            switch (evt.getPropertyName()) {
+                case "nbrofScannedClasses":
+                    fldScanCount.setText(String.valueOf(evt.getNewValue()));
+                    break;
+                case "nbrofClassesWithRefs":
+                    fldRefCount.setText(String.valueOf(evt.getNewValue()));
+                    break;
+                case "state":
+                    boolean done = SwingWorker.StateValue.DONE.equals(evt.getNewValue());
+                    fldScanCount.setForeground(done ? Color.BLACK : Color.RED);
+                    cmdReport.setEnabled(done && ((BackgroundScanner)evt.getSource()).getNbrofFoundReferences() > 0);
+                    //                saveAsMenuItem.setEnabled(true);
+                    break;
+                default:
+                    break;
             }
         }
     }

@@ -48,7 +48,7 @@ public class Util {
 
     public static RecentItem[] loadRecentItems(Preferences fromNode) throws BackingStoreException {
         String[] keys = fromNode.keys();
-        ArrayList<RecentItem> values = new ArrayList<RecentItem>(keys.length);
+        ArrayList<RecentItem> values = new ArrayList<>(keys.length);
         for (String key : keys) {
             String val = fromNode.get(key, null);
             if (val != null) {
@@ -76,9 +76,9 @@ public class Util {
         toNode.flush();
     }
 
-    public static File getFile(String filename) {
+    public static File getFileFromUserInput(String input) {
         File ret = null;
-        String fn = filename.trim();
+        String fn = input.trim();
         if (fn.startsWith("\"") && fn.endsWith("\"") && fn.length() > 1) {
             fn = fn.substring(1, fn.length() - 1);
         }
@@ -92,7 +92,7 @@ public class Util {
     }
 
     public static String[] split(CharSequence s, Pattern matchPattern) {
-        ArrayList<String> matchList = new ArrayList<String>();
+        ArrayList<String> matchList = new ArrayList<>();
         Matcher m = matchPattern.matcher(s);
 
         while (m.find()) {
