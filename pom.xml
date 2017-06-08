@@ -44,7 +44,7 @@
     <dependencies>
         <dependency>
             <groupId>com.vajasoft</groupId>
-            <artifactId>Classfile</artifactId>
+            <artifactId>classfile</artifactId>
             <version>1.1</version>
         </dependency>
         <dependency>
