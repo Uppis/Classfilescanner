@@ -59,7 +59,7 @@ public class WizCardMembers extends javax.swing.JPanel implements WizardCard {
             if (cf != null) {
                 memberListModel.addData(cf.getFields());
                 memberListModel.addData(cf.getMethods());
-                fldMemberOfTheClass.setText(cf.getClassName());
+                fldMemberOfTheClass.setText(cf.getClassNameInternal());
             }
         }
     }

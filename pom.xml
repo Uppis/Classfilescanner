@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.vajasoft</groupId>
             <artifactId>Classfile</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>com.vajasoft</groupId>
@@ -61,6 +61,13 @@
             <groupId>com.vajasoft</groupId>
             <artifactId>zup</artifactId>
             <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>merita.astiedot</groupId>
+            <artifactId>6280</artifactId>
+            <version>113.0</version>
+            <scope>test</scope>
+            <type>jar</type>
         </dependency>
     </dependencies>
     <properties>
